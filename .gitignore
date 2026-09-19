@@ -1,0 +1,15 @@
+# .NET / WinUI
+winui/bin/
+winui/obj/
+winui/publish/
+Zen-Windows11/
+*.user
+*.suo
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+
+# Journaux
+*.log
