@@ -2,6 +2,8 @@
 
 ## 20-09-2026
 
+- 01:00 Ajout d’une installation Windows par utilisateur dans LocalAppData, avec raccourci du menu Démarrer, icône native, enregistrement dans les Applications installées et désinstallation complète sans droits administrateur.
+- 01:00 Validation du cycle installé : lancement depuis le dossier système utilisateur, extraction PDF de 8 740 caractères, suppression complète de l’exécutable, du raccourci et du registre, puis réinstallation réussie de Zen 0.1.0.
 - 00:52 Préparation de la publication publique sur GitHub : exclusion de la distribution autonome du suivi Git, ajout du lien vers les Releases dans le README et contrôle local de l’absence de secrets.
 - 00:50 Enrichissement du README avec la stack C#/.NET 8 et WinUI 3, les bibliothèques documentaires, OCR et images, le fonctionnement local autonome et la commande de publication Windows x64.
 - 00:48 Remplacement du README technique par une présentation courte et professionnelle de Zen, avec fonctionnalités essentielles, liens de lancement et capture propre de l’interface Windows 11 actuelle.

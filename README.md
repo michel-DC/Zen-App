@@ -28,6 +28,16 @@ Télécharger la [dernière version de Zen](https://github.com/michel-DC/Zen-App
 
 Les sources WinUI 3 sont disponibles dans [`winui`](winui).
 
+## Installation Windows
+
+Depuis un dossier contenant la distribution `Zen-Windows11`, exécuter :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File installer\Install-Zen.ps1
+```
+
+Zen est alors installé pour l’utilisateur courant, ajouté au menu Démarrer et enregistré dans les Applications installées de Windows.
+
 ## Compilation
 
 ```powershell
