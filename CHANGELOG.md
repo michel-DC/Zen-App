@@ -1,5 +1,20 @@
 # Journal des changements
 
+## 04-10-2026
+
+- 20:09 Préparation de la release v0.2.0 : versions de l’application et de l’installateur alignées, archive Windows autonome avec scripts d’installation.
+
+- 19:26 Export des documents et des images en PDF au format A4, sans déformation du contenu.
+- 19:26 Ajout de la fusion de plusieurs PDF avec sélection multiple, réorganisation et retrait des fichiers ; toutes les pages finales sont ajustées au format A4.
+- 19:26 Suppression de la mention Zen dans les noms proposés pour tous les fichiers générés, avec numérotation si le nom existe déjà.
+- 19:26 Validation réelle dans l’interface Windows : cinq PDF réunis en dix pages A4, ordre, texte, images, liens et rotations conservés ; destination et bouton entièrement visibles à 1280 × 800. Installation locale et distribution mises à jour.
+
+## 26-09-2026
+
+- 12:30 Correction de la conversion PDF vers DOCX sur une page : suppression des coupures de page importées, désactivation des retours de ligne visuels forcés et ajustement Word uniquement si le contenu déborde encore ; la sortie n’est remplacée qu’après validation de sa pagination.
+- 12:41 Validation sur un CV public d’une page : l’ancienne version produit deux pages et pousse la dernière ligne sur la seconde ; la version corrigée produit une page avec le même texte extrait.
+- 12:45 Publication de la distribution Windows x64 autonome et mise à jour de l’installation locale dans AppData ; vérification du raccourci, de l’empreinte du binaire et d’une conversion PDF vers DOCX sur une page depuis la version installée.
+
 ## 20-09-2026
 
 - 01:00 Ajout d’une installation Windows par utilisateur dans LocalAppData, avec raccourci du menu Démarrer, icône native, enregistrement dans les Applications installées et désinstallation complète sans droits administrateur.

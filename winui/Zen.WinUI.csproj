@@ -5,6 +5,7 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>Zen.WinUI</RootNamespace>
     <AssemblyName>Zen</AssemblyName>
+    <Version>0.2.0</Version>
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -17,7 +18,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs" />
+    <Compile Include="a4-page-format.cs" />
     <Compile Include="MainWindow.xaml.cs" />
+    <Compile Include="main-window-pdf-merge.cs" />
+    <Compile Include="pdf-merge-processor.cs" />
+    <Compile Include="pdf-a4-page-normalizer.cs" />
+    <Compile Include="output-file-naming.cs" />
     <Compile Include="DocxLayoutRestorer.cs" />
     <Compile Include="FileProcessor.cs" />
     <Compile Include="ImageProcessor.cs" />
@@ -37,6 +43,7 @@
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageReference Include="PdfPig" Version="0.1.16" />
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
     <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>

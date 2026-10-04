@@ -28,6 +28,7 @@
                 <controls:NavigationViewItem Content="Image en JPG" Tag="image_jpg"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Pictures" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
                 <controls:NavigationViewItem Content="PNG en PDF" Tag="png_pdf"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Pictures" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
                 <controls:NavigationViewItem Content="JPG en PDF" Tag="jpg_pdf"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Pictures" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
+                <controls:NavigationViewItem x:Name="MergePdfItem" Content="Fusionner des PDF" Tag="pdf_merge" AutomationProperties.AutomationId="MergePdfItem"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Copy" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
                 <controls:NavigationViewItemHeader Content="Extraire" />
                 <controls:NavigationViewItem Content="Texte d’un PDF" Tag="pdf_text"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Find" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
                 <controls:NavigationViewItem Content="Texte d’un DOCX" Tag="docx_text"><controls:NavigationViewItem.Icon><SymbolIcon Symbol="Find" /></controls:NavigationViewItem.Icon></controls:NavigationViewItem>
@@ -66,13 +67,37 @@
                                     <TextBlock x:Name="FilesDescription" Text="Sélectionnez la source puis confirmez l’emplacement du résultat." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                 </StackPanel>
 
-                                <Grid ColumnSpacing="12" RowSpacing="8">
+                                <Grid x:Name="SourceSection" ColumnSpacing="12" RowSpacing="8">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="144" /></Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                                     <TextBox x:Name="SourcePath" Header="Fichier source" MinHeight="40" PlaceholderText="Choisissez ou collez le chemin du fichier" TextChanged="SourcePath_TextChanged" />
                                     <Button x:Name="BrowseInputButton" AutomationProperties.AutomationId="BrowseInputButton" Grid.Column="1" Content="Parcourir" MinHeight="40" Click="ChooseInput_Click" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
                                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Parcourez vos fichiers ou collez un chemin. Rien n’est envoyé sur Internet." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
                                 </Grid>
+
+                                <StackPanel x:Name="MergeSection" Spacing="12" Visibility="Collapsed">
+                                    <Button x:Name="AddMergeInputsButton" AutomationProperties.AutomationId="AddMergeInputsButton" Content="Ajouter des PDF" MinHeight="40" Click="ChooseMergeInputs_Click" />
+                                    <TextBlock Text="Les pages seront réunies dans cet ordre et ajustées au format A4." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock x:Name="MergeEmptyHint" Text="Aucun PDF sélectionné. Ajoutez au moins deux fichiers." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <ListView x:Name="MergeFilesList" AutomationProperties.AutomationId="MergeFilesList" AutomationProperties.Name="PDF à fusionner dans l’ordre" MinHeight="80" MaxHeight="180" SelectionMode="Single" SelectionChanged="MergeFiles_SelectionChanged">
+                                        <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="MinHeight" Value="32" />
+                                            <Setter Property="Padding" Value="12,0" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding FileName}" ToolTipService.ToolTip="{Binding Path}" TextTrimming="CharacterEllipsis" Margin="0,4" />
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button x:Name="MoveMergeUpButton" AutomationProperties.AutomationId="MoveMergeUpButton" Content="Monter" MinHeight="40" IsEnabled="False" Click="MoveMergeUp_Click" />
+                                        <Button x:Name="MoveMergeDownButton" AutomationProperties.AutomationId="MoveMergeDownButton" Content="Descendre" MinHeight="40" IsEnabled="False" Click="MoveMergeDown_Click" />
+                                        <Button x:Name="RemoveMergeInputButton" AutomationProperties.AutomationId="RemoveMergeInputButton" Content="Retirer" MinHeight="40" IsEnabled="False" Click="RemoveMergeInput_Click" />
+                                    </StackPanel>
+                                </StackPanel>
 
                                 <Border x:Name="OutputDivider" Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
 
@@ -142,7 +167,7 @@
                                             <ProgressRing x:Name="Progress" Width="20" Height="20" IsActive="False" Visibility="Collapsed" />
                                             <TextBlock Text="Prêt pour une opération locale" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" />
                                         </StackPanel>
-                                        <Button x:Name="RunButton" MinHeight="44" Content="Convertir en PDF" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Style="{StaticResource AccentButtonStyle}" Click="Run_Click" />
+                                        <Button x:Name="RunButton" AutomationProperties.AutomationId="RunButton" MinHeight="44" Content="Convertir en PDF" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Style="{StaticResource AccentButtonStyle}" Click="Run_Click" />
                                     </StackPanel>
                                 </Grid>
                             </Border>

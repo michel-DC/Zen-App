@@ -30,7 +30,7 @@ internal static class FileProcessor
         int radius)
     {
         EnsureSourceExists(input);
-        var output = ResolveOutputPath(input, requestedOutput, extension);
+        var output = ResolveOutputPath(input, requestedOutput, operation, extension);
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         switch (operation)
         {
@@ -46,11 +46,9 @@ internal static class FileProcessor
         if (!File.Exists(input)) throw new FileNotFoundException("Le fichier source est introuvable.", input);
     }
 
-    private static string ResolveOutputPath(string input, string? requestedOutput, string extension)
+    private static string ResolveOutputPath(string input, string? requestedOutput, string operation, string extension)
     {
-        var output = requestedOutput ?? Path.Combine(
-            Path.GetDirectoryName(input)!,
-            $"{Path.GetFileNameWithoutExtension(input)}-zen.{extension}");
+        var output = requestedOutput ?? OutputFileNaming.SuggestPath(input, operation, extension);
         if (string.Equals(Path.GetFullPath(input), Path.GetFullPath(output), StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Le fichier de sortie doit être différent du fichier source.");
         return output;

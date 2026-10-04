@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$releaseVersion = '0.2.0'
 
 $source = [IO.Path]::GetFullPath($SourcePath)
 $sourceExecutable = Join-Path $source 'Zen.exe'
@@ -46,7 +47,7 @@ New-Item -Path $uninstallKey -Force | Out-Null
 $uninstallCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$uninstallerDestination`""
 $estimatedSize = [int] ((Get-ChildItem -LiteralPath $installPath -Recurse -File | Measure-Object Length -Sum).Sum / 1KB)
 New-ItemProperty -Path $uninstallKey -Name DisplayName -Value 'Zen' -PropertyType String -Force | Out-Null
-New-ItemProperty -Path $uninstallKey -Name DisplayVersion -Value '0.1.0' -PropertyType String -Force | Out-Null
+New-ItemProperty -Path $uninstallKey -Name DisplayVersion -Value $releaseVersion -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $uninstallKey -Name Publisher -Value 'michel-DC' -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $uninstallKey -Name InstallLocation -Value $installPath -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $uninstallKey -Name DisplayIcon -Value "$installedExecutable,0" -PropertyType String -Force | Out-Null
@@ -61,7 +62,7 @@ if (-not $DoNotLaunch) {
 
 [pscustomobject]@{
     Name = 'Zen'
-    Version = '0.1.0'
+    Version = $releaseVersion
     InstallPath = $installPath
     Shortcut = $shortcutPath
 }

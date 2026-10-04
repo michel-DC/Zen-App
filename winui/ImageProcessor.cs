@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using DrawingColor = System.Drawing.Color;
@@ -117,12 +118,19 @@ internal static class ImagePdfWriter
         WriteText("%PDF-1.4\n");
         WriteObject(1, "<< /Type /Catalog /Pages 2 0 R >>");
         WriteObject(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-        WriteObject(3, $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {image.Width} {image.Height}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+        WriteObject(3, string.Create(CultureInfo.InvariantCulture,
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {A4PageFormat.WidthInPoints:0.######} {A4PageFormat.HeightInPoints:0.######}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>"));
         offsets.Add(bytes.Count);
         WriteText($"4 0 obj\n<< /Type /XObject /Subtype /Image /Width {image.Width} /Height {image.Height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length {jpeg.Length} >>\nstream\n");
         bytes.AddRange(jpeg);
         WriteText("\nendstream\nendobj\n");
-        var content = $"q\n{image.Width} 0 0 {image.Height} 0 0 cm\n/Im0 Do\nQ\n";
+        var scale = Math.Min(A4PageFormat.WidthInPoints / image.Width, A4PageFormat.HeightInPoints / image.Height);
+        var width = image.Width * scale;
+        var height = image.Height * scale;
+        var x = (A4PageFormat.WidthInPoints - width) / 2;
+        var y = (A4PageFormat.HeightInPoints - height) / 2;
+        var content = string.Create(CultureInfo.InvariantCulture,
+            $"q\n{width:0.######} 0 0 {height:0.######} {x:0.######} {y:0.######} cm\n/Im0 Do\nQ\n");
         WriteObject(5, $"<< /Length {Encoding.ASCII.GetByteCount(content)} >>\nstream\n{content}endstream");
         WriteCrossReference(bytes, offsets, WriteText);
         File.WriteAllBytes(output, bytes.ToArray());

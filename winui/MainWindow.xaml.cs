@@ -22,6 +22,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        MergeFilesList.ItemsSource = mergeInputs;
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "Zen.ico"));
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1280, 800));
         SetOperation(operation);
@@ -37,6 +38,7 @@ public sealed partial class MainWindow : Window
     private void SetOperation(string id)
     {
         operation = id; inputPath = null; outputPath = null;
+        mergeInputs.Clear();
         var tool = tools[id];
         PageTitle.Text = tool.Title; PageDescription.Text = tool.Description;
         SourcePath.Text = string.Empty; OutputPath.Text = string.Empty;
@@ -58,6 +60,13 @@ public sealed partial class MainWindow : Window
         CropOptions.Visibility = crop ? Visibility.Visible : Visibility.Collapsed;
         RadiusOptions.Visibility = rounded ? Visibility.Visible : Visibility.Collapsed;
         StatusInfo.IsOpen = false;
+        SourceSection.Visibility = IsPdfMerge ? Visibility.Collapsed : Visibility.Visible;
+        MergeSection.Visibility = IsPdfMerge ? Visibility.Visible : Visibility.Collapsed;
+        if (IsPdfMerge)
+        {
+            FilesDescription.Text = "Ajoutez les PDF puis organisez leur ordre dans le document final.";
+            RefreshMergeInputs();
+        }
     }
 
     private async void ChooseInput_Click(object sender, RoutedEventArgs e)
@@ -71,7 +80,7 @@ public sealed partial class MainWindow : Window
         inputPath = file.Path; outputPath = null; SourcePath.Text = inputPath; OutputPath.Text = string.Empty;
         ClearExtractedText();
         if (!tools[operation].ExtractsText)
-            OutputHint.Text = $"Nom suggéré : {Path.GetFileNameWithoutExtension(inputPath)}-zen.{tools[operation].Extension}";
+            OutputHint.Text = $"Nom suggéré : {Path.GetFileName(OutputFileNaming.SuggestPath(inputPath, operation, tools[operation].Extension))}";
         ResultLabel.Text = $"Prêt : {Path.GetFileName(inputPath)}";
         RunButton.IsEnabled = true;
         ShowStatus("Fichier sélectionné.", InfoBarSeverity.Success);
@@ -79,7 +88,7 @@ public sealed partial class MainWindow : Window
 
     private void SourcePath_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (isBusy) return;
+        if (isBusy || IsPdfMerge) return;
         ClearExtractedText();
         var candidate = SourcePath.Text.Trim().Trim('"');
         if (candidate.Length == 0)
@@ -106,7 +115,7 @@ public sealed partial class MainWindow : Window
         OutputPath.Text = string.Empty;
         ClearExtractedText();
         if (!tools[operation].ExtractsText)
-            OutputHint.Text = $"Nom suggéré : {Path.GetFileNameWithoutExtension(inputPath)}-zen.{tools[operation].Extension}";
+            OutputHint.Text = $"Nom suggéré : {Path.GetFileName(OutputFileNaming.SuggestPath(inputPath, operation, tools[operation].Extension))}";
         ResultLabel.Text = $"Prêt : {Path.GetFileName(inputPath)}";
         RunButton.IsEnabled = true;
     }
@@ -116,7 +125,10 @@ public sealed partial class MainWindow : Window
         if (isBusy) return;
         if (tools[operation].ExtractsText) return;
         if (inputPath is null) { ShowStatus("Choisissez d’abord un fichier source.", InfoBarSeverity.Warning); return; }
-        var picker = new FileSavePicker { SuggestedFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}-zen", SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+        var suggestedName = IsPdfMerge
+            ? Path.GetFileNameWithoutExtension(PdfMergeProcessor.SuggestOutputPath(inputPath))
+            : Path.GetFileNameWithoutExtension(OutputFileNaming.SuggestPath(inputPath, operation, tools[operation].Extension));
+        var picker = new FileSavePicker { SuggestedFileName = suggestedName, SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
         picker.FileTypeChoices.Add(tools[operation].Extension.ToUpperInvariant(), new[] { $".{tools[operation].Extension}" });
         var file = await picker.PickSaveFileAsync();
@@ -127,6 +139,12 @@ public sealed partial class MainWindow : Window
 
     private async void Run_Click(object sender, RoutedEventArgs e)
     {
+        if (isBusy) return;
+        if (IsPdfMerge)
+        {
+            await RunPdfMergeAsync();
+            return;
+        }
         if (inputPath is null) { ShowStatus("Choisissez un fichier source pour continuer.", InfoBarSeverity.Warning); return; }
 
         var jobOperation = operation;
@@ -164,7 +182,7 @@ public sealed partial class MainWindow : Window
     private void SetBusy(bool busy)
     {
         isBusy = busy;
-        RunButton.IsEnabled = !busy && inputPath is not null;
+        RunButton.IsEnabled = !busy && HasValidInput;
         BrowseInputButton.IsEnabled = !busy;
         BrowseOutputButton.IsEnabled = !busy && !tools[operation].ExtractsText;
         CropX.IsEnabled = !busy;
@@ -172,6 +190,8 @@ public sealed partial class MainWindow : Window
         CropWidth.IsEnabled = !busy;
         CropHeight.IsEnabled = !busy;
         Radius.IsEnabled = !busy;
+        SourcePath.IsEnabled = !busy;
+        UpdateMergeButtons();
         foreach (var menuItem in Navigation.MenuItems)
             if (menuItem is NavigationViewItem item) item.IsEnabled = !busy;
         Progress.IsActive = busy;

@@ -18,14 +18,14 @@ internal static class DocxLayoutRestorer
         @"^(?:https?://|www\.)\S+$",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    internal static void Restore(string pdfPath, string docxPath)
+    internal static int Restore(string pdfPath, string docxPath)
     {
         var sourcePages = PdfTextProcessor.ReadPages(pdfPath);
         var sourceLines = sourcePages
             .SelectMany(page => page.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .ToList();
-        if (sourceLines.Count == 0) return;
+        if (sourceLines.Count == 0) return sourcePages.Count;
 
         using var package = WordprocessingDocument.Open(docxPath, true);
         var mainPart = package.MainDocumentPart
@@ -33,13 +33,16 @@ internal static class DocxLayoutRestorer
         var wordDocument = mainPart.Document
             ?? throw new InvalidOperationException("Le document Word converti ne contient pas de contenu lisible.");
         var body = wordDocument.Body;
-        if (body is null) return;
+        if (body is null) return sourcePages.Count;
 
-        RestoreLineBreaks(body, sourceLines);
+        // PDF text extractors report visual wrapping as line endings. Forcing each
+        // wrap into Word adds lines when Word's imported text width differs.
+        if (sourcePages.Count > 1) RestoreLineBreaks(body, sourceLines);
         DocxParallelSectionRestorer.Restore(body);
         DocxPageRestorer.Restore(body, sourcePages);
         RestoreHyperlinks(mainPart, body);
         wordDocument.Save();
+        return sourcePages.Count;
     }
 
     private static void RestoreLineBreaks(Body body, IReadOnlyList<string> sourceLines)

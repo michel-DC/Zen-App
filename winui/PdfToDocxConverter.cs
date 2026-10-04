@@ -53,9 +53,11 @@ internal static class PdfToDocxConverter
             documentsObject = application.Documents;
             documentObject = OpenPdf(application, documentsObject, temporaryInput, caption);
             SaveAsDocx(documentObject, temporaryOutput);
+            ReleaseComObject(ref documentObject);
+            var sourcePageCount = DocxLayoutRestorer.Restore(input, temporaryOutput);
+            if (sourcePageCount == 1) FitSinglePage(documentsObject, temporaryOutput);
             CloseWord(ref documentObject, ref documentsObject, ref applicationObject);
             MoveValidatedOutput(temporaryOutput, output);
-            DocxLayoutRestorer.Restore(input, output);
         }
         catch (COMException exception)
         {
@@ -126,6 +128,46 @@ internal static class PdfToDocxConverter
             EmbedTrueTypeFonts: true,
             CompatibilityMode: 65535);
         document.Close(false);
+    }
+
+    private static void FitSinglePage(object documentsObject, string path)
+    {
+        dynamic documents = documentsObject;
+        object? documentObject = null;
+        try
+        {
+            documentObject = documents.Open(
+                FileName: path,
+                ConfirmConversions: false,
+                ReadOnly: false,
+                AddToRecentFiles: false,
+                Visible: false);
+            dynamic document = documentObject;
+            document.Repaginate();
+            var pages = (int)document.ComputeStatistics(2);
+            for (var attempt = 0; pages > 1 && attempt < 3; attempt++)
+            {
+                document.FitToPages();
+                document.Repaginate();
+                var reducedPages = (int)document.ComputeStatistics(2);
+                if (reducedPages >= pages) break;
+                pages = reducedPages;
+            }
+            if (pages > 1)
+                throw new InvalidOperationException(
+                    "Word n’a pas pu conserver le contenu de ce PDF d’une page sur une seule page DOCX.");
+            document.Save();
+            document.Close(false);
+        }
+        finally
+        {
+            if (documentObject is not null)
+            {
+                try { ((dynamic)documentObject).Close(false); }
+                catch { }
+            }
+            ReleaseComObject(ref documentObject);
+        }
     }
 
     private static void MoveValidatedOutput(string temporaryOutput, string output)

@@ -10,6 +10,11 @@ internal static class DocxPageRestorer
 {
     internal static void Restore(Body body, IReadOnlyList<string> sourcePages)
     {
+        if (sourcePages.Count == 1)
+        {
+            RemoveImportedPageBoundaries(body);
+            return;
+        }
         if (sourcePages.Count < 2) return;
 
         var paragraphs = body.Elements<Paragraph>().ToList();
@@ -32,6 +37,22 @@ internal static class DocxPageRestorer
         }
 
         RestoreTrailingVisualPage(paragraphs, sourcePages, unresolvedPages, previousBoundary);
+    }
+
+    private static void RemoveImportedPageBoundaries(Body body)
+    {
+        foreach (var paragraph in body.Descendants<Paragraph>())
+        {
+            paragraph.ParagraphProperties?.PageBreakBefore?.Remove();
+            foreach (var renderedBreak in paragraph.Descendants<LastRenderedPageBreak>().ToList())
+                renderedBreak.Remove();
+            foreach (var pageBreak in paragraph.Descendants<Break>()
+                .Where(pageBreak => pageBreak.Type?.Value == BreakValues.Page).ToList())
+                pageBreak.Type = BreakValues.TextWrapping;
+
+            var sectionType = paragraph.ParagraphProperties?.SectionProperties?.GetFirstChild<SectionType>();
+            if (sectionType is not null) sectionType.Val = SectionMarkValues.Continuous;
+        }
     }
 
     private static PageBoundary? FindBoundary(

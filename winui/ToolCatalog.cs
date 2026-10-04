@@ -16,6 +16,7 @@ internal static class ToolCatalog
         {
             ["docx_pdf"] = new("DOCX en PDF", "Convertir un document Word au format PDF.", "pdf", [".docx"]),
             ["pdf_docx"] = new("PDF en DOCX", "Créer un document Word à partir d’un PDF.", "docx", [".pdf"]),
+            ["pdf_merge"] = new("Fusionner des PDF", "Combiner plusieurs PDF dans un seul document A4, dans l’ordre choisi.", "pdf", [".pdf"]),
             ["image_jpg"] = new("Image en JPG", "Convertir une image PNG, BMP, GIF ou TIFF au format JPG.", "jpg", [".png", ".bmp", ".gif", ".tif", ".tiff"]),
             ["png_pdf"] = new("PNG en PDF", "Créer un PDF à partir d’une image PNG.", "pdf", [".png"]),
             ["jpg_pdf"] = new("JPG en PDF", "Créer un PDF à partir d’une image JPG.", "pdf", [".jpg", ".jpeg"]),
@@ -31,6 +32,7 @@ internal static class ToolCatalog
     {
         "docx_pdf" => "Convertir en PDF",
         "pdf_docx" => "Convertir en DOCX",
+        "pdf_merge" => "Fusionner les PDF",
         "png_pdf" or "jpg_pdf" => "Créer le PDF",
         "image_jpg" => "Créer le JPG",
         "pdf_text" or "docx_text" or "image_ocr" => "Extraire le texte",

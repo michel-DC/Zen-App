@@ -27,13 +27,22 @@ internal static class OfficeDocumentProcessor
 
     internal static void ConvertToPdf(string input, string output)
     {
-        if (WordToPdfConverter.IsAvailable)
+        var temporaryInput = Path.Combine(Path.GetTempPath(), $"zen-a4-{Guid.NewGuid():N}.docx");
+        try
         {
-            WordToPdfConverter.Convert(input, output);
-            return;
-        }
+            A4PageFormat.PrepareWordCopy(input, temporaryInput);
+            if (WordToPdfConverter.IsAvailable)
+            {
+                WordToPdfConverter.Convert(temporaryInput, output);
+                return;
+            }
 
-        ConvertWithLibreOffice(input, output);
+            ConvertWithLibreOffice(temporaryInput, output);
+        }
+        finally
+        {
+            if (File.Exists(temporaryInput)) File.Delete(temporaryInput);
+        }
     }
 
     private static void ConvertWithLibreOffice(string input, string output)
